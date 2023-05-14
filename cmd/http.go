@@ -1,6 +1,3 @@
-/*
-Copyright © 2023 NAME HERE <EMAIL ADDRESS>
-*/
 package cmd
 
 import (
@@ -10,13 +7,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var port int
+
 // httpCmd represents the http command
 var httpCmd = &cobra.Command{
 	Use:   "http",
 	Short: "Run http server",
 	Run: func(cmd *cobra.Command, args []string) {
 		server := http.NewHttpServer()
-		if err := server.Start(8081); err != nil {
+		if err := server.Start(port); err != nil {
 			fmt.Println(err)
 		}
 	},
@@ -24,4 +23,5 @@ var httpCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(httpCmd)
+	httpCmd.PersistentFlags().IntVarP(&port, "port", "p", 8080, "expose port number")
 }
