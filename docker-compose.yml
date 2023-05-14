@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:alpine
+    container_name: go-ethereum-db
+    env_file:
+      - .env
+    ports:
+      - 5434:5432
+    volumes:
+      - go-ethereum-db:/var/lib/postgresql/data
+    networks:
+      - go-ethereum.network
+
+  api:
+    build:
+      context: .
+      dockerfile: build/dockerfile.api
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - ${EXPOSE_API_PORT}:8080
+    depends_on:
+      - db
+    networks:
+      - go-ethereum.network
+    command: "./api http"
+
+volumes:
+  go-ethereum-db:
+
+networks:
+  go-ethereum.network:
