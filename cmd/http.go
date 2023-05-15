@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"go-ethereum/internal/http"
+	"go-ethereum/internal/delivery/http"
 
 	"github.com/spf13/cobra"
 )
