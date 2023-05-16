@@ -3,27 +3,27 @@ package eth
 import (
 	"context"
 	"fmt"
-	"go-ethereum/internal/repository/eth_client"
+	"go-ethereum/internal/client"
+	"go-ethereum/internal/client/eth_client"
+	"go-ethereum/internal/repository"
+	"go-ethereum/internal/repository/eth_repo"
+	"go-ethereum/internal/service"
 	"go-ethereum/pkg/postgres"
 )
 
 type Impl struct {
-	Client eth_client.Client
-	DB     *postgres.Postgres
+	Client client.Eth
+	Repo   repository.Eth
 }
 
-func NewService() (EthService, error) {
+func NewService(db *postgres.Postgres) (service.Eth, error) {
 	client, err := eth_client.NewClient()
-	if err != nil {
-		return nil, err
-	}
-	db, err := postgres.NewPostgres()
 	if err != nil {
 		return nil, err
 	}
 	return &Impl{
 		Client: client,
-		DB:     db,
+		Repo:   eth_repo.NewRepo(db),
 	}, nil
 }
 
@@ -46,13 +46,7 @@ func (i *Impl) SaveBlock(ctx context.Context, blockId int64) error {
 		return err
 	}
 	fmt.Println("SaveBlock", block)
-	res := i.DB.DB.Create(block)
-	fmt.Println("SaveBlock", res)
-	if res.Error != nil {
-		// add system log
-		return res.Error
-	}
-	return nil
+	return i.Repo.SaveBlock(block)
 }
 
 func (i *Impl) SaveTransaction() {

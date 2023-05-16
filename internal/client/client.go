@@ -1,10 +1,10 @@
-package eth_client
+package client
 
 import (
 	"context"
 	"go-ethereum/internal/entity"
 )
 
-type Client interface {
+type Eth interface {
 	BlockByNumber(ctx context.Context, blockId int64) (*entity.Block, error)
 }

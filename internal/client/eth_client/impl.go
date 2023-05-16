@@ -6,6 +6,8 @@ import (
 	"go-ethereum/internal/entity"
 	"math/big"
 
+	"go-ethereum/internal/client"
+
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -15,7 +17,7 @@ type Impl struct {
 	Client *ethclient.Client
 }
 
-func NewClient() (Client, error) {
+func NewClient() (client.Eth, error) {
 	c, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, fmt.Errorf("ethclient.Dial failed: %v\n", err)

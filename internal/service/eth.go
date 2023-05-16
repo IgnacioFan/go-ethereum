@@ -1,7 +1,7 @@
-package eth
+package service
 
 import "context"
 
-type EthService interface {
+type Eth interface {
 	SaveBlock(ctx context.Context, blockId int64) error
 }
