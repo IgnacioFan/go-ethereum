@@ -2,45 +2,53 @@ package index
 
 import (
 	"context"
-	"fmt"
+	"go-ethereum/internal/client/eth_client"
+	"go-ethereum/internal/service"
 	"go-ethereum/internal/service/eth"
+	"go-ethereum/pkg/logger"
+	"go-ethereum/pkg/postgres"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 type EthIndex struct {
-	Service eth.EthService
+	Service service.Eth
+	Logger  *logrus.Logger
 }
 
-func NewEthIndexer() *EthIndex {
-	eth, err := eth.NewService()
+func NewEthIndexer() (*EthIndex, error) {
+	logger := logger.NewLogger()
+	client, err := eth_client.NewClient()
+	db, err := postgres.NewPostgres()
+	eth, err := eth.NewService(db, client)
 	if err != nil {
-		fmt.Println(err)
-		return nil
+		logger.Error("Failed at NewEthIndexer", err)
+		return nil, err
 	}
-	return &EthIndex{Service: eth}
+
+	return &EthIndex{Service: eth, Logger: logger}, nil
 }
 
-func (i *EthIndex) Run() {
+func (i *EthIndex) Run(start, end int) {
 	blockNumCh := make(chan int64, 10000)
-	startBlock := 1
-	endBlock := 5
 	go i.Process(blockNumCh)
 	for {
-		if endBlock == startBlock {
+		if start == end {
 			time.Sleep(time.Second)
 			continue
 		}
-		blockNumCh <- int64(startBlock)
-		startBlock++
+		blockNumCh <- int64(start)
+		start++
 	}
 }
 
 func (i *EthIndex) Process(blockNumCh <-chan int64) {
-	for n := range blockNumCh {
+	for blockId := range blockNumCh {
 		ctx := context.Background()
-		err := i.Service.SaveBlock(ctx, n)
+		err := i.Service.SaveBlock(ctx, blockId)
 		if err != nil {
-			fmt.Println("Process", err)
+			i.Logger.Error("Failed at Process", err)
 			continue
 		}
 	}

@@ -3,7 +3,8 @@ package cmd
 import (
 	"fmt"
 	"go-ethereum/internal/delivery/index"
-	"go-ethereum/pkg/postgres"
+	"log"
+	"os"
 
 	"github.com/spf13/cobra"
 )
@@ -14,13 +15,12 @@ var indexCmd = &cobra.Command{
 	Short: "Run blocks indexer",
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Blocks index called")
-		pg, err := postgres.NewPostgres()
+		indexer, err := index.NewEthIndexer()
 		if err != nil {
-			fmt.Println("postgres:", err)
+			log.Fatal(err)
+			os.Exit(1)
 		}
-		fmt.Println(pg)
-		indexer := index.NewEthIndexer()
-		indexer.Run()
+		indexer.Run(1, 5)
 	},
 }
 

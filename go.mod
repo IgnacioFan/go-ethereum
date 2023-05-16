@@ -7,6 +7,7 @@ require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-gormigrate/gormigrate/v2 v2.0.2
 	github.com/joho/godotenv v1.4.0
+	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.7.0
 	gorm.io/driver/postgres v1.5.0
 	gorm.io/gorm v1.25.1

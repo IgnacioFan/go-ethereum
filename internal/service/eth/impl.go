@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"go-ethereum/internal/client"
-	"go-ethereum/internal/client/eth_client"
 	"go-ethereum/internal/repository"
 	"go-ethereum/internal/repository/eth_repo"
 	"go-ethereum/internal/service"
@@ -16,11 +15,7 @@ type Impl struct {
 	Repo   repository.Eth
 }
 
-func NewService(db *postgres.Postgres) (service.Eth, error) {
-	client, err := eth_client.NewClient()
-	if err != nil {
-		return nil, err
-	}
+func NewService(db *postgres.Postgres, client client.Eth) (service.Eth, error) {
 	return &Impl{
 		Client: client,
 		Repo:   eth_repo.NewRepo(db),
@@ -42,7 +37,6 @@ func (i *Impl) GetTransaction() {
 func (i *Impl) SaveBlock(ctx context.Context, blockId int64) error {
 	block, err := i.Client.BlockByNumber(ctx, blockId)
 	if err != nil {
-		// add system log
 		return err
 	}
 	fmt.Println("SaveBlock", block)
