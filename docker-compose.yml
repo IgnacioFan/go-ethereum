@@ -17,6 +17,7 @@ services:
     build:
       context: .
       dockerfile: build/dockerfile.api
+    image: go-ethereum-api
     restart: always
     env_file:
       - .env
@@ -27,6 +28,15 @@ services:
     networks:
       - go-ethereum.network
     command: "./api http"
+
+  indexer:
+    image: go-ethereum-api:latest
+    depends_on:
+      - db
+      - api
+    networks:
+      - go-ethereum.network
+    command: "./api index"
 
 volumes:
   go-ethereum-db:
