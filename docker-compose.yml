@@ -3,11 +3,11 @@ version: "3.8"
 services:
   db:
     image: postgres:alpine
-    container_name: go-ethereum-db
+    container_name: ${POSTGRES_HOST}
     env_file:
       - .env
     ports:
-      - 5434:5432
+      - 5432:5432
     volumes:
       - go-ethereum-db:/var/lib/postgresql/data
     networks:
