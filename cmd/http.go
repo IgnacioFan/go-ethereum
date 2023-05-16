@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"go-ethereum/internal/delivery/http"
 	"go-ethereum/pkg/postgres"
+	"log"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -18,14 +18,14 @@ var httpCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		db, err := postgres.NewPostgres()
 		if err = db.NewMirgate(); err != nil {
-			fmt.Println(err.Error())
+			log.Fatal(err)
 			os.Exit(1)
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
 		server := http.NewHttpServer()
 		if err := server.Start(port); err != nil {
-			fmt.Println(err)
+			log.Fatal(err)
 			os.Exit(1)
 		}
 	},
