@@ -23,8 +23,12 @@ var httpCmd = &cobra.Command{
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		server := http.NewHttpServer()
-		if err := server.Start(port); err != nil {
+		server, err := http.NewHttpServer()
+		if err != nil {
+			log.Fatal(err)
+			os.Exit(1)
+		}
+		if err = server.Start(port); err != nil {
 			log.Fatal(err)
 			os.Exit(1)
 		}
