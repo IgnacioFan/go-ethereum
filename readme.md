@@ -12,15 +12,20 @@ The Go Ethereum provides API and blocks indexer services for interacting with th
 1. Clone the repository to your local machine.
 2. Ensure that Docker is installed and running on your machine.
 3. Create a .env file
-4. Pickup an operaton that you want
+
+```bash
+make gen.env
 ```
-// to start all services
+
+4. Pickup an operaton that you want
+```bash
+# to start all services
 make app.start
 
-// to close all services
+# to close all services
 make app.close
 
-// to access db container
+# to access db container
 make db.cli
 ```
 

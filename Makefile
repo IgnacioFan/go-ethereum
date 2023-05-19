@@ -21,3 +21,6 @@ app.stop:
 
 db.cli:
 	docker exec -it $(POSTGRES_HOST) psql -U $(POSTGRES_USER)
+
+gen.env:
+	./script/generate_env.sh
