@@ -4,6 +4,8 @@ import (
 	"go-ethereum/internal/entity"
 	"go-ethereum/internal/repository"
 	"go-ethereum/pkg/postgres"
+
+	"gorm.io/gorm"
 )
 
 type Impl struct {
@@ -14,6 +16,24 @@ func NewRepo(db *postgres.Postgres) repository.Eth {
 	return &Impl{
 		*db,
 	}
+}
+
+func (i *Impl) GetBlocks() ([]*entity.Block, error) {
+	var blocks []*entity.Block
+	if err := i.DB.Limit(5).Order("number desc").Find(&blocks).Error; err != nil {
+		return nil, err
+	}
+	return blocks, nil
+}
+
+func (i *Impl) GetBlockByNumber(number uint64) (*entity.Block, error) {
+	var block *entity.Block
+	if err := i.DB.Preload("Transactions", func(db *gorm.DB) *gorm.DB {
+		return db.Select("Hash", "BlockHash")
+	}).First(&block, "number = ?", number).Error; err != nil {
+		return nil, err
+	}
+	return block, nil
 }
 
 func (i *Impl) BlocksExist(start, end int64) (bool, error) {

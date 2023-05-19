@@ -34,6 +34,42 @@ func NewService(db *postgres.Postgres) (service.Eth, error) {
 	}, nil
 }
 
+func (i *Impl) FormatBlock(input *entity.Block) *service.Block {
+	txhashes := []string{}
+
+	for _, tx := range input.Transactions {
+		txhashes = append(txhashes, tx.Hash)
+	}
+
+	return &service.Block{
+		Number:       input.Number,
+		Hash:         input.Hash,
+		Timestamp:    input.Timestamp,
+		ParentHash:   input.ParentHash,
+		Transactions: txhashes,
+	}
+}
+
+func (i *Impl) GetBlocks(ctx context.Context) (*service.Blocks, error) {
+	blocks, err := i.Repo.GetBlocks()
+	if err != nil {
+		return nil, err
+	}
+	res := &service.Blocks{}
+	for _, block := range blocks {
+		res.Blocks = append(res.Blocks, i.FormatBlock(block))
+	}
+	return res, nil
+}
+
+func (i *Impl) GetBlock(ctx context.Context, number int64) (*service.Block, error) {
+	block, err := i.Repo.GetBlockByNumber(uint64(number))
+	if err != nil {
+		return nil, err
+	}
+	return i.FormatBlock(block), err
+}
+
 func (i *Impl) BlocksExist(ctx context.Context, startNumber, endNumber int64) (bool, error) {
 	return i.Repo.BlocksExist(startNumber, endNumber)
 }
