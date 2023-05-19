@@ -7,7 +7,7 @@ The Go Ethereum provides API and blocks indexer services for interacting with th
 - Go 1.16+
 - Docker, the project is based on `docker-compose.yml` to boot up all runnable services
 
-### How to set up and use
+### How to use
 
 1. Clone the repository to your local machine.
 2. Ensure that Docker is installed and running on your machine.
@@ -21,25 +21,23 @@ make gen.env
 
 4. Run `make app.start`
 5. Test the following API endpoints
-  - Make sure you have started out the services, before sending requests!
-  - Endpoint: /blocks?limit=n
-  ```bash
-  curl --url http://localhost:8080/blocks
-  curl --url http://localhost:8080/blocks?limit=10
-  ```
+  - Make sure you have started all services, before sending requests!
+  - And please wait for a few secs to let the indexer do its job.
 
-  - Endpoint: /blocks/:block_number
-  ```bash
-  curl --url http://localhost:8080/blocks/blockNnumber
-  ```
+```bash
+# Endpoint: /blocks?limit=n
+curl --url http://localhost:8080/blocks
+curl --url http://localhost:8080/blocks?limit=5
 
-  - Endpoint: /tansaction/:txHash
-  ```bash
-  curl --url http://localhost:8080/transaction/txHash
-  ```
+# Endpoint: /blocks/:id
+curl --url http://localhost:8080/blocks/1234..
+
+# Endpoint: /tansaction/:txHash
+curl --url http://localhost:8080/transaction/0xf754c..
+```
 6. Run `make app.stop` to clean up the containers
 
-End! To know more about other executable commands, please check out the Makefile or check out the system design section for further details.
+End! To know more about other executable commands, please check out the Makefile.
 
 ## System design
 ### Architecture
