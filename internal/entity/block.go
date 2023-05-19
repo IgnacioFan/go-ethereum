@@ -1,8 +1,9 @@
 package entity
 
 type Block struct {
-	Number     uint64 `json:"block_num"`
-	Hash       string `json:"block_hash"`
-	Timestamp  uint64 `json:"block_time"`
-	ParentHash string `json:"parent_hash"`
+	Number       uint64        `gorm:"primaryKey;unique"`
+	Hash         string        `gorm:"size:128;uniqueIndex;not null"`
+	Timestamp    uint64        `gorm:"not null"`
+	ParentHash   string        `gorm:"size:128;not null"`
+	Transactions []Transaction `gorm:"foreignKey:BlockHash;references:Hash"`
 }

@@ -2,15 +2,19 @@ package index
 
 import (
 	"context"
-	"go-ethereum/internal/client/eth_client"
+	"fmt"
 	"go-ethereum/internal/service"
 	"go-ethereum/internal/service/eth"
+	"go-ethereum/internal/util"
 	"go-ethereum/pkg/logger"
 	"go-ethereum/pkg/postgres"
+	"sync"
 	"time"
 
 	"github.com/sirupsen/logrus"
 )
+
+var wg sync.WaitGroup
 
 type EthIndex struct {
 	Service service.Eth
@@ -19,37 +23,55 @@ type EthIndex struct {
 
 func NewEthIndexer() (*EthIndex, error) {
 	logger := logger.NewLogger()
-	client, err := eth_client.NewClient()
 	db, err := postgres.NewPostgres()
-	eth, err := eth.NewService(db, client)
+	eth, err := eth.NewService(db)
+
 	if err != nil {
-		logger.Error("Failed at NewEthIndexer", err)
+		logger.Error(err)
 		return nil, err
 	}
 
 	return &EthIndex{Service: eth, Logger: logger}, nil
 }
 
-func (i *EthIndex) Run(start, end int) {
-	blockNumCh := make(chan int64, 10000)
-	go i.Process(blockNumCh)
+func (eth *EthIndex) Run(start, window, end int64) {
+	ctx := context.Background()
+	chainId, err := eth.Service.NetworkIDRPC(ctx)
+	if err != nil {
+		eth.Logger.Error(err)
+		return
+	}
 	for {
-		if start == end {
-			time.Sleep(time.Second)
-			continue
+		if start <= end {
+			next := util.Min(start+window-1, end)
+			existed, err := eth.Service.BlocksExist(ctx, start, next)
+			if err != nil {
+				eth.Logger.Error(err)
+				return
+			}
+			if existed {
+				start += window
+				continue
+			}
+			for number := start; number <= next; number++ {
+				go eth.ScanBlock(ctx, number, chainId)
+				wg.Add(1)
+			}
+			wg.Wait()
+
+			eth.Logger.Info(fmt.Sprintf("Scanned blocks from %v to %v", start, next))
+			start += window
 		}
-		blockNumCh <- int64(start)
-		start++
+		start = util.Min(start, end)
+		eth.Logger.Info(fmt.Sprintf("Stop at block %v", start))
+		time.Sleep(3 * time.Second)
 	}
 }
 
-func (i *EthIndex) Process(blockNumCh <-chan int64) {
-	for blockId := range blockNumCh {
-		ctx := context.Background()
-		err := i.Service.SaveBlock(ctx, blockId)
-		if err != nil {
-			i.Logger.Error("Failed at Process", err)
-			continue
-		}
+func (eth *EthIndex) ScanBlock(ctx context.Context, number, chainId int64) {
+	defer wg.Done()
+	if err := eth.Service.SaveBlockRPC(ctx, number, chainId); err != nil {
+		eth.Logger.Error(err)
 	}
+	return
 }
