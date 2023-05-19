@@ -2,6 +2,7 @@ package eth
 
 import (
 	"context"
+	"encoding/json"
 	"go-ethereum/internal/entity"
 	"go-ethereum/internal/repository"
 	"go-ethereum/internal/repository/eth_repo"
@@ -50,6 +51,18 @@ func (i *Impl) FormatBlock(input *entity.Block) *service.Block {
 	}
 }
 
+func (i *Impl) FormatTransaction(tx *entity.Transaction, logs []*service.Log) *service.Transaction {
+	return &service.Transaction{
+		Hash:  tx.Hash,
+		From:  tx.From,
+		To:    tx.To,
+		Nonce: tx.Nonce,
+		Data:  tx.Data,
+		Value: tx.Value,
+		Logs:  logs,
+	}
+}
+
 func (i *Impl) GetBlocks(ctx context.Context) (*service.Blocks, error) {
 	blocks, err := i.Repo.GetBlocks()
 	if err != nil {
@@ -68,6 +81,51 @@ func (i *Impl) GetBlock(ctx context.Context, number int64) (*service.Block, erro
 		return nil, err
 	}
 	return i.FormatBlock(block), err
+}
+
+func (i *Impl) GetTransaction(ctx context.Context, hash string) (*service.Transaction, error) {
+	tx, err := i.Repo.GetTransaction(hash)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(tx.Logs) == 0 {
+		logs, err := i.TransactionLogsRPC(ctx, tx.Hash)
+		if err != nil {
+			return nil, err
+		}
+		logStr, _ := json.Marshal(logs)
+		if err := i.Repo.SaveTransactionLogs(tx, string(logStr)); err != nil {
+			return nil, err
+		}
+		return i.FormatTransaction(tx, logs), nil
+	}
+
+	var logs []*service.Log
+	if err := json.Unmarshal([]byte(tx.Logs), &logs); err != nil {
+		return nil, err
+	}
+	return i.FormatTransaction(tx, logs), nil
+}
+
+func (i *Impl) TransactionLogsRPC(ctx context.Context, hash string) ([]*service.Log, error) {
+	commonHash := common.Hash{}
+	if err := commonHash.UnmarshalText([]byte(hash)); err != nil {
+		return nil, err
+	}
+	receipt, err := i.Client.TransactionReceipt(ctx, commonHash)
+	if err != nil {
+		return nil, err
+	}
+
+	logs := []*service.Log{}
+	for _, log := range receipt.Logs {
+		logs = append(logs, &service.Log{
+			Index: log.Index,
+			Data:  common.Bytes2Hex(log.Data),
+		})
+	}
+	return logs, nil
 }
 
 func (i *Impl) BlocksExist(ctx context.Context, startNumber, endNumber int64) (bool, error) {

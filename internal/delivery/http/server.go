@@ -68,7 +68,14 @@ func (s *Server) SetRoute() {
 			ctx.JSON(http.StatusOK, block)
 		})
 		v1.GET("transaction/:txHash", func(ctx *gin.Context) {
-			ctx.JSON(http.StatusOK, "returns TX data with event logs")
+			txHash := ctx.Param("txHash")
+			tx, err := s.Service.GetTransaction(ctx, txHash)
+			if err != nil {
+				s.Logger.Debug("transaction/:txHash, error: ", err)
+				ctx.JSON(http.StatusInternalServerError, err.Error())
+				return
+			}
+			ctx.JSON(http.StatusOK, tx)
 		})
 	}
 }

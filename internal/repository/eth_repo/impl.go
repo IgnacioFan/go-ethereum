@@ -36,6 +36,18 @@ func (i *Impl) GetBlockByNumber(number uint64) (*entity.Block, error) {
 	return block, nil
 }
 
+func (i *Impl) GetTransaction(hash string) (*entity.Transaction, error) {
+	var tx *entity.Transaction
+	if err := i.DB.First(&tx, "hash", hash).Error; err != nil {
+		return nil, err
+	}
+	return tx, nil
+}
+
+func (i *Impl) SaveTransactionLogs(tx *entity.Transaction, logs string) error {
+	return i.DB.Model(&tx).Update("name", logs).Error
+}
+
 func (i *Impl) BlocksExist(start, end int64) (bool, error) {
 	var count int64
 	result := i.DB.Model(&entity.Block{}).Where("number >= ? AND number <= ?", start, end).Count(&count)

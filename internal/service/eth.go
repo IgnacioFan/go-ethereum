@@ -7,6 +7,7 @@ import (
 type Eth interface {
 	GetBlocks(ctx context.Context) (*Blocks, error)
 	GetBlock(ctx context.Context, number int64) (*Block, error)
+	GetTransaction(ctx context.Context, hash string) (*Transaction, error)
 	BlocksExist(ctx context.Context, startNumber, endNumber int64) (bool, error)
 	BlockExist(ctx context.Context, number int64) (bool, error)
 	NetworkIDRPC(ctx context.Context) (int64, error)
@@ -25,3 +26,17 @@ type Blocks struct {
 	Blocks []*Block `json:"blocks"`
 }
 
+type Transaction struct {
+	Hash  string `json:"tx_hash"`
+	From  string `json:"from"`
+	To    string `json:"to"`
+	Nonce uint64 `json:"nonce"`
+	Data  string `json:"data"`
+	Value int64  `json:"value"`
+	Logs  []*Log `json:"logs"`
+}
+
+type Log struct {
+	Index uint   `json:"index"`
+	Data  string `json:"data"`
+}
