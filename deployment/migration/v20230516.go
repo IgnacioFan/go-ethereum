@@ -12,10 +12,10 @@ var v20230516 = &gormigrate.Migration{
 	Migrate: func(tx *gorm.DB) error {
 		// when table already exists, it just adds fields as columns
 		type Block struct {
-			Number     uint64 `gorm:"primaryKey,index"`
-			Hash       string `gorm:"index"`
-			Timestamp  uint64
-			ParentHash string
+			Number     uint64 `gorm:"primaryKey;unique"`
+			Hash       string `gorm:"size:128;uniqueIndex;not null"`
+			Timestamp  uint64 `gorm:"not null"`
+			ParentHash string `gorm:"size:128;not null"`
 		}
 		return tx.AutoMigrate(&Block{})
 	},
