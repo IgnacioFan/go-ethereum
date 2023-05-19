@@ -45,7 +45,7 @@ func (i *Impl) GetTransaction(hash string) (*entity.Transaction, error) {
 }
 
 func (i *Impl) SaveTransactionLogs(tx *entity.Transaction, logs string) error {
-	return i.DB.Model(&tx).Update("name", logs).Error
+	return i.DB.Model(&tx).Update("logs", logs).Error
 }
 
 func (i *Impl) BlocksExist(start, end int64) (bool, error) {
