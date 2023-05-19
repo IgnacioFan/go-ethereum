@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"go-ethereum/internal/delivery/index"
 	"log"
 	"os"
@@ -9,21 +8,29 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// indexCmd represents the index command
-var indexCmd = &cobra.Command{
-	Use:   "index",
-	Short: "Run blocks indexer",
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Blocks index called")
-		indexer, err := index.NewEthIndexer()
-		if err != nil {
-			log.Fatal(err)
-			os.Exit(1)
-		}
-		indexer.Run(1, 5)
-	},
-}
+var (
+	start  int64
+	window int64
+	end    int64
+	url    string
+	// indexCmd represents the index command
+	indexCmd = &cobra.Command{
+		Use:   "index",
+		Short: "Run blocks indexer",
+		Run: func(cmd *cobra.Command, args []string) {
+			indexer, err := index.NewEthIndexer()
+			if err != nil {
+				log.Fatal(err)
+				os.Exit(1)
+			}
+			indexer.Run(start, window, end)
+		},
+	}
+)
 
 func init() {
 	rootCmd.AddCommand(indexCmd)
+	indexCmd.Flags().Int64Var(&start, "start", 0, "Start is where the block starts")
+	indexCmd.Flags().Int64Var(&window, "window", 0, "Window is the subset of block numbers between start and end")
+	indexCmd.Flags().Int64Var(&end, "end", 0, "End is Where the block ends (optional, default value is obtained from API)")
 }
