@@ -22,7 +22,7 @@ services:
     build:
       context: .
       dockerfile: build/dockerfile.api
-    container_name: go-ethereum-api
+    container_name: ${API_HOST}
     restart: always
     env_file:
       - .env
@@ -39,7 +39,7 @@ services:
     build:
       context: .
       dockerfile: build/dockerfile.api
-    container_name: go-ethereum-indexer
+    container_name: ${INDEXER_HOST}
     restart: always
     env_file:
       - .env
@@ -48,7 +48,7 @@ services:
         condition: service_healthy
     networks:
       - go-ethereum.network
-    command: "./api index"
+    command: "./api index --start ${INDEXER_START_BLOCK} --window ${INDEXER_SCAN_WINDOW} --end ${INDEXER_END_BLOCK} --sleep ${INDEXER_SLEEP_SECS}"
 
 volumes:
   go-ethereum-db:

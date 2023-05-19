@@ -34,8 +34,9 @@ func NewEthIndexer() (*EthIndex, error) {
 	return &EthIndex{Service: eth, Logger: logger}, nil
 }
 
-func (eth *EthIndex) Run(start, window, end int64) {
+func (eth *EthIndex) Run(start, window, end, sleep int64) {
 	ctx := context.Background()
+	sleepDuration := time.Duration(sleep) * time.Second
 	chainId, err := eth.Service.NetworkIDRPC(ctx)
 	if err != nil {
 		eth.Logger.Error(err)
@@ -69,7 +70,7 @@ func (eth *EthIndex) Run(start, window, end int64) {
 		}
 		start = util.Min(start, curr).(int64)
 		eth.Logger.Info(fmt.Sprintf("Stop at block %v", start))
-		time.Sleep(10 * time.Second)
+		time.Sleep(sleepDuration)
 	}
 }
 
