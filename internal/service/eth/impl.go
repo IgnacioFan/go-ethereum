@@ -137,6 +137,11 @@ func (i *Impl) BlockExist(ctx context.Context, number int64) (bool, error) {
 	return i.Repo.BlockExist(number)
 }
 
+func (i *Impl) BlockNumberRPC(ctx context.Context) (int64, error) {
+	number, err := i.Client.BlockNumber(ctx)
+	return int64(number), err
+}
+
 func (i *Impl) NetworkIDRPC(ctx context.Context) (int64, error) {
 	chainId, err := i.Client.NetworkID(ctx)
 	return chainId.Int64(), err

@@ -42,8 +42,13 @@ func (eth *EthIndex) Run(start, window, end int64) {
 		return
 	}
 	for {
-		if start <= end {
-			next := util.Min(start+window-1, end).(int64)
+		curr, err := eth.MaxBlockNumber(ctx, end)
+		if err != nil {
+			eth.Logger.Error(err)
+			return
+		}
+		if start <= curr {
+			next := util.Min(start+window-1, curr).(int64)
 			existed, err := eth.Service.BlocksExist(ctx, start, next)
 			if err != nil {
 				eth.Logger.Error(err)
@@ -62,10 +67,22 @@ func (eth *EthIndex) Run(start, window, end int64) {
 			eth.Logger.Info(fmt.Sprintf("Scanned blocks from %v to %v", start, next))
 			start += window
 		}
-		start = util.Min(start, end).(int64)
+		start = util.Min(start, curr).(int64)
 		eth.Logger.Info(fmt.Sprintf("Stop at block %v", start))
-		time.Sleep(3 * time.Second)
+		time.Sleep(10 * time.Second)
 	}
+}
+
+func (eth *EthIndex) MaxBlockNumber(ctx context.Context, end int64) (int64, error) {
+	if end != 0 {
+		return end, nil
+	}
+	number, err := eth.Service.BlockNumberRPC(ctx)
+	if err != nil {
+		eth.Logger.Error(err)
+		return 0, err
+	}
+	return number, nil
 }
 
 func (eth *EthIndex) ScanBlock(ctx context.Context, number, chainId int64) {

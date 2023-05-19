@@ -9,7 +9,7 @@ type Eth interface {
 	GetBlock(ctx context.Context, number int64) (*Block, error)
 	GetTransaction(ctx context.Context, hash string) (*Transaction, error)
 	BlocksExist(ctx context.Context, startNumber, endNumber int64) (bool, error)
-	BlockExist(ctx context.Context, number int64) (bool, error)
+	BlockNumberRPC(ctx context.Context) (int64, error)
 	NetworkIDRPC(ctx context.Context) (int64, error)
 	SaveBlockRPC(ctx context.Context, number, chainId int64) error
 }
