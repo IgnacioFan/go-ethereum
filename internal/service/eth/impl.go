@@ -64,8 +64,8 @@ func (i *Impl) FormatTransaction(tx *entity.Transaction, logs []*service.Log) *s
 	}
 }
 
-func (i *Impl) GetBlocks(ctx context.Context) (*service.Blocks, error) {
-	blocks, err := i.Repo.GetBlocks()
+func (i *Impl) GetBlocks(ctx context.Context, limit int) (*service.Blocks, error) {
+	blocks, err := i.Repo.GetBlocks(limit)
 	if err != nil {
 		return nil, err
 	}

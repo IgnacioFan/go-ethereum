@@ -5,7 +5,7 @@ import (
 )
 
 type Eth interface {
-	GetBlocks(ctx context.Context) (*Blocks, error)
+	GetBlocks(ctx context.Context, limit int) (*Blocks, error)
 	GetBlock(ctx context.Context, number int64) (*Block, error)
 	GetTransaction(ctx context.Context, hash string) (*Transaction, error)
 	BlocksExist(ctx context.Context, startNumber, endNumber int64) (bool, error)

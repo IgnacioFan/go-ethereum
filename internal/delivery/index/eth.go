@@ -43,7 +43,7 @@ func (eth *EthIndex) Run(start, window, end int64) {
 	}
 	for {
 		if start <= end {
-			next := util.Min(start+window-1, end)
+			next := util.Min(start+window-1, end).(int64)
 			existed, err := eth.Service.BlocksExist(ctx, start, next)
 			if err != nil {
 				eth.Logger.Error(err)
@@ -62,7 +62,7 @@ func (eth *EthIndex) Run(start, window, end int64) {
 			eth.Logger.Info(fmt.Sprintf("Scanned blocks from %v to %v", start, next))
 			start += window
 		}
-		start = util.Min(start, end)
+		start = util.Min(start, end).(int64)
 		eth.Logger.Info(fmt.Sprintf("Stop at block %v", start))
 		time.Sleep(3 * time.Second)
 	}

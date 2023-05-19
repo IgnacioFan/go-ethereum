@@ -18,9 +18,9 @@ func NewRepo(db *postgres.Postgres) repository.Eth {
 	}
 }
 
-func (i *Impl) GetBlocks() ([]*entity.Block, error) {
+func (i *Impl) GetBlocks(limit int) ([]*entity.Block, error) {
 	var blocks []*entity.Block
-	if err := i.DB.Limit(5).Order("number desc").Find(&blocks).Error; err != nil {
+	if err := i.DB.Limit(limit).Order("number desc").Find(&blocks).Error; err != nil {
 		return nil, err
 	}
 	return blocks, nil
