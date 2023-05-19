@@ -3,6 +3,7 @@ package eth
 import (
 	"context"
 	"encoding/json"
+	"go-ethereum/deployment/env"
 	"go-ethereum/internal/entity"
 	"go-ethereum/internal/repository"
 	"go-ethereum/internal/repository/eth_repo"
@@ -15,16 +16,16 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
-var (
-	url = "test"
-)
-
 type Impl struct {
 	Client *ethclient.Client
 	Repo   repository.Eth
 }
 
 func NewService(db *postgres.Postgres) (service.Eth, error) {
+	url, err := env.EthClientURL()
+	if err != nil {
+		return nil, err
+	}
 	client, err := ethclient.Dial(url)
 	if err != nil {
 		return nil, err
