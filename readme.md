@@ -43,7 +43,7 @@ End! To know more about other executable commands, please check out the Makefile
 ### Architecture
 The system consists of the following components:
 
-- API service: Handles 3 kinds of use cases.
+- API service: Handles API use cases.
   - GET /blocks?limit=n
   - GET /blocks/:id
   - GET /transaction/:txHash
